@@ -23,7 +23,7 @@
         ],
         "psr-4": {
             "Bolt\\Extension\\Thirdwave\\Export\\": [
-                ""
+                "", "src"
             ]
         }
     }
