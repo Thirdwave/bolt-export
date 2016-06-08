@@ -1,0 +1,30 @@
+{
+    "name": "thirdwave/bolt-export",
+    "description": "General export function for Bolt CMS",
+    "type": "bolt-extension",
+    "keywords": [
+        "bolt",
+        "export"
+    ],
+    "require": {
+        "bolt/bolt": ">=2.0.0,<3.0.0"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Thirdwave",
+            "email": "info@thirdwave.nl",
+            "homepage": "http://www.thirdwave.nl"
+        }
+    ],
+    "autoload": {
+        "files": [
+            "init.php"
+        ],
+        "psr-4": {
+            "Bolt\\Extension\\Thirdwave\\Export\\": [
+                ""
+            ]
+        }
+    }
+}
