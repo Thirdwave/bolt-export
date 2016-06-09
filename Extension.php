@@ -69,6 +69,8 @@ class Extension extends BaseExtension
             $path = '/cms';
         }
 
+        $path = rtrim($path, '/');
+
         $this->addMenuOption(Translator::__('Export content'), $path . '/export');
 
         $this->addAssets();
