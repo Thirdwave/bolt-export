@@ -1,0 +1,199 @@
+{% extends '_base/_page-nav.twig' %}
+
+{% block page_title %}
+    {{ __('Export content') }}
+{% endblock %}
+
+{% block page_main %}
+    <form method="post" action="{{ path('export_download') }}">
+        <fieldset>
+            <div class="row">
+                <div class="col-sm-12">
+                    <h4>{{ __('Content type') }}</h4>
+                    <div class="form-group">
+                        <select class="wide" data-select style="width: 100%;" title="" name="export[contenttype]" data-export-contenttype>
+                            {% for name, properties in contenttypes %}
+                                <option value="{{ name }}"{% if contenttype.slug == name %} selected{% endif %}>{{ properties.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        {% if contenttype is not empty %}
+            {% set fields = base_columns|merge(contenttype.fields) %}
+            <fieldset>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <h4>{{ __('Fields') }}</h4>
+                        <div class="form-group">
+                            {#{% include '@export/partials/field-actions.twig' %}#}
+                            <ul class="list-unstyled fields" data-sortable>
+                                {% for name, properties in fields %}
+                                    <li class="field">
+                                        <div class="pull-right action">
+                                            <i class="fa fa-sort" data-sortable-handle></i>
+                                        </div>
+                                        <label class="label-control">
+                                            <input type="checkbox" name="export[fields][]"
+                                                   value="{{ name }}"{% if properties is iterable %} checked{% endif %}>
+                                            {{ __(properties.label|default(name)|capitalize) }}
+                                        </label>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                            {#{% include '@export/partials/field-actions.twig' %}#}
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+            <fieldset>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <h4>{{ __('Filters') }}</h4>
+                        <div class="form-group">
+                            <ul class="list-unstyled export-table" data-export-filters></ul>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="btn-group btn-group-justified">
+                                        <a href="#" class="btn btn-default btn-sm" data-export-add="filters">
+                                            <i class="fa fa-plus"></i> {{ __('Add') }}
+                                        </a>
+                                        <a href="#" class="btn btn-default btn-sm hidden" data-export-remove-all="filters">
+                                            <i class="fa fa-times"></i> {{ __('Remove all') }}
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+
+            {% if contenttype.relations is not empty %}
+                <fieldset>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <h4>{{ __('Filter by relation') }}</h4>
+                            {% for name, properties in contenttype.relations %}
+                                <div class="form-group">
+                                    <label class="control-label" for="export_relation_{{ name }}">{{ __(properties.label|default(name)) }}</label>
+                                    <select class="wide" data-select style="width: 100%;" id="export_relation_{{ name }}" name="export[relations][{{ name }}][]" multiple>
+                                        {% for id, caption in properties.values %}
+                                            <option value="{{ id }}">{{ caption }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </fieldset>
+            {% endif %}
+
+            <fieldset>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <h4>{{ __('Sorting') }}</h4>
+                        <div class="form-group">
+                            <ul class="list-unstyled export-table" data-sortable data-export-sorting></ul>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="btn-group btn-group-justified">
+                                        <a href="#" class="btn btn-default btn-sm" data-export-add="sorting">
+                                            <i class="fa fa-plus"></i> {{ __('Add') }}
+                                        </a>
+                                        <a href="#" class="btn btn-default btn-sm hidden" data-export-remove-all="sorting">
+                                            <i class="fa fa-times"></i> {{ __('Remove all') }}
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+            <fieldset>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <h4>{{ __('Options') }}</h4>
+                        <div class="form-group">
+                            <label class="control-label">
+                                <input type="checkbox" name="export[header]"> {{ __('Add header row') }}
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+            <fieldset>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <h4>{{ __('Download') }}</h4>
+                        {#<div class="form-group">#}
+                            {#<label class="control-label" for="export_format">{{ __('Choose format') }}</label>#}
+                            {#<select class="form-control" id="export_format" name="export[format]">#}
+                                {#<option value="csv">CSV</option>#}
+                            {#</select>#}
+                        {#</div>#}
+                        <div class="form-group">
+                            <label class="control-label" for="export_file">{{ __('File name') }}</label>
+                            <input class="form-control" name="export[file]" id="export_file">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">{{ __('Export') }}</button>
+                    </div>
+                </div>
+            </fieldset>
+        {% endif %}
+    </form>
+
+    {% if contenttype is not empty %}
+        <li data-export-template="sorting" class="hidden export-row">
+            <div class="export-remove">
+                <i class="fa fa-times" data-export-remove="sorting"></i>
+            </div>
+            <div class="export-cell">
+                <select title="" class="form-control" name="export[sorting][fields][]">
+                    {% for name, properties in fields %}
+                        <option value="{{ name }}">{{ __(properties.label|default(name)|capitalize) }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="export-cell">
+                <select title="" class="form-control" name="export[sorting][directions][]">
+                    <option value="asc">{{ __('Oplopend') }}</option>
+                    <option value="desc">{{ __('Aflopend') }}</option>
+                </select>
+            </div>
+            <div class="export-handle">
+                <i class="fa fa-sort" data-sortable-handle></i>
+            </div>
+        </li>
+        <li data-export-template="filters" class="hidden export-row">
+            <div class="export-remove">
+                <i class="fa fa-times" data-export-remove="filters"></i>
+            </div>
+            <div class="export-cell">
+                <select title="" class="form-control" name="export[filters][fields][]">
+                    {% for name, properties in fields %}
+                        <option value="{{ name }}">{{ __(properties.label|default(name)|capitalize) }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="export-cell">
+                <select title="" class="form-control" name="export[filters][operators][]">
+                    <option value="eq">{{ __('equals') }}</option>
+                    <option value="neq">{{ __('does \not equal') }}</option>
+                    <option value="like">{{ __('like') }}</option>
+                    <option value="gt">{{ __('greater then') }}</option>
+                    <option value="lt">{{ __('lower then') }}</option>
+                    <option value="gte">{{ __('greater then or equal') }}</option>
+                    <option value="lte">{{ __('lower then or equal') }}</option>
+                    <option value="isNull">{{ __('empty') }}</option>
+                    <option value="isNotNull">{{ __('not empty') }}</option>
+                </select>
+            </div>
+            <div class="export-cell">
+                <input title="" type="text" class="form-control" name="export[filters][values][]"/>
+            </div>
+        </li>
+    {% endif %}
+{% endblock %}
