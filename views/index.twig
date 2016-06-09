@@ -12,6 +12,8 @@
                     <h4>{{ __('Content type') }}</h4>
                     <div class="form-group">
                         <select class="wide" data-select style="width: 100%;" title="" name="export[contenttype]" data-export-contenttype>
+                            <option value="">{{ __('Select content type') }}</option>
+                            <option value=""></option>
                             {% for name, properties in contenttypes %}
                                 <option value="{{ name }}"{% if contenttype.slug == name %} selected{% endif %}>{{ properties.name }}</option>
                             {% endfor %}
