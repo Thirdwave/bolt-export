@@ -1,0 +1,51 @@
+.export-remove {
+    text-align: right;
+    width: 13px;
+    display: table-cell;
+    box-sizing: border-box;
+}
+
+.export-handle {
+    width: 13px;
+    display: table-cell;
+    box-sizing: border-box;
+}
+
+.export-cell {
+    width: auto;
+    display: table-cell;
+    box-sizing: border-box;
+    padding: 0 5px;
+}
+
+.export-cell input {
+    display: inline-block;
+}
+
+.export-row {
+    width: 100%;
+    display: table-row;
+    box-sizing: border-box;
+}
+
+.export-table {
+    width: 100%;
+    display: table;
+    box-sizing: border-box;
+}
+
+.fields {
+    margin-bottom: 0;
+}
+
+.field {
+    padding: 10px 0;
+}
+
+.field .pull-right {
+    padding-top: 4px;
+}
+
+.action {
+    cursor: pointer;
+}
