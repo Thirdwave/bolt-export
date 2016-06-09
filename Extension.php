@@ -66,10 +66,10 @@ class Extension extends BaseExtension
         // is not bootstrapped through the regular file. Note that
         // this should not be applicable to your setup.
         if ($path === '/') {
-            $path = '/cms/';
+            $path = '/cms';
         }
 
-        $this->addMenuOption(Translator::__('Export content'), $path . 'export');
+        $this->addMenuOption(Translator::__('Export content'), $path . '/export');
 
         $this->addAssets();
     }
