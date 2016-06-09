@@ -2,7 +2,6 @@
 
 use Bolt\Storage;
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Query\QueryBuilder;
 
 
@@ -160,10 +159,12 @@ class ExportQuery
      * @param array $relations
      * @return $this
      */
-    public function relations(array $relations) {
-        foreach ( $relations as $relation => $keys ) {
+    public function relations(array $relations)
+    {
+        foreach ($relations as $relation => $keys) {
             $where = $this->query->expr()->andX();
-            $where->add($this->query->expr()->eq('relations.from_contenttype', $this->query->expr()->literal($this->contenttype)));
+            $where->add($this->query->expr()->eq('relations.from_contenttype',
+              $this->query->expr()->literal($this->contenttype)));
             $where->add($this->query->expr()->eq('relations.from_id', $this->contenttype . ".id"));
             $where->add($this->query->expr()->eq('relations.to_contenttype', $this->query->expr()->literal($relation)));
             $where->add($this->query->expr()->in('relations.to_id', $keys));

@@ -42,7 +42,7 @@ class Extension extends BaseExtension
 
         // When no permissions are defined in the configuration file, add default
         // roles that should have access to the export functions. When the roles
-        // are defined, check if role 'root' is present and add it when absent.
+        // are defined, check if role 'root' is present and add it if absent.
         if (!isset($this->config['permissions']) || !is_array($this->config['permissions'])) {
             $this->config['permissions'] = array('root', 'admin', 'developer');
         } else {
@@ -76,7 +76,7 @@ class Extension extends BaseExtension
 
 
     /**
-     *
+     * Adds locale files.
      */
     protected function addLocale() {
         $folder = __DIR__ . '/locales/' . substr($this->app['locale'], 0, 2);
