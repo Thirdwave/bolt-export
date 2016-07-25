@@ -26,5 +26,8 @@
                 "", "src"
             ]
         }
+    },
+    "extra" : {
+		"bolt-assets" : "assets"
     }
 }
