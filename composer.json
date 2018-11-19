@@ -18,16 +18,12 @@
         }
     ],
     "autoload": {
-        "files": [
-            "init.php"
-        ],
         "psr-4": {
-            "Bolt\\Extension\\Thirdwave\\Export\\": [
-                "", "src"
-            ]
+            "Bolt\\Extension\\Thirdwave\\Export\\": "src"
         }
     },
     "extra" : {
-		"bolt-assets" : "assets"
+		"bolt-assets" : "web"
+		"bolt-class" : "Bolt\\Extension\\Thirdwave\\Export\\Extension"
     }
 }
