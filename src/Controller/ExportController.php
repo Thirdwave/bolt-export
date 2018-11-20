@@ -2,6 +2,8 @@
 
 use Bolt\Content;
 use Bolt\Controller\Base;
+use Bolt\Extension\Thirdwave\Export\Storage\ExportQuery;
+use Doctrine\DBAL\DBALException;
 use Silex\Application;
 use Silex\ControllerCollection;
 use Symfony\Component\HttpFoundation\Request;
@@ -11,19 +13,6 @@ use Symfony\Component\HttpFoundation\Response;
 class ExportController extends Base
 {
 
-
-    /**
-     * @var Extension
-     */
-//    protected $extension;
-
-    /**
-     * @param ControllerCollection $c
-     */
-//    public function __construct(Extension $extension)
-//    {
-//        $this->extension = $extension;
-//    }
 
     /**
      * {@inheritdoc}
@@ -50,8 +39,6 @@ class ExportController extends Base
         $contenttype = null;
         if ($request->query->has('contenttype')) {
             $contenttype = $app['config']->get('contenttypes/' . $request->query->get('contenttype'));
-
-            $this->expandRelations($contenttype, $app);
         }
 
         return $app['render']->render('@export/index.twig', array(
@@ -66,12 +53,13 @@ class ExportController extends Base
      * @param Application $app
      * @param Request     $request
      * @return Response
+     * @throws DBALException
      */
     public function download(Application $app, Request $request)
     {
         $profile  = $request->request->get('export');
         $filename = !empty($profile['file']) ? $profile['file'] . '.csv' : date('Ymd') . '-' . $profile['contenttype'] . '.csv';
-        $query    = new ExportQuery($app['db'], $app['storage']);
+        $query    = new ExportQuery($app['db'], $app['storage.legacy']);
         $rows     = $query->profile($profile)->results();
 
         if (isset($profile['header'])) {
@@ -96,25 +84,5 @@ class ExportController extends Base
           'Pragma'                    => 'public',
           'Content-Length'            => strlen($csv)
         ));
-    }
-
-
-    /**
-     * @param array       $contenttype
-     * @param Application $app
-     */
-    protected function expandRelations(array &$contenttype, Application $app) {
-        if ( empty($contenttype['relations']) ) {
-            return;
-        }
-
-        foreach ( $contenttype['relations'] as $relation => &$properties ) {
-            $items = $app['storage']->getContent($relation);
-
-            $properties['values'] = [];
-            foreach ( $items as $item ) {
-                $properties['values'][$item->values['id']] = $item->getTitle();
-            }
-        }
     }
 }
