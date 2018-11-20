@@ -1,56 +1,42 @@
-<?php namespace Bolt\Extension\Thirdwave\Export;
+<?php namespace Bolt\Extension\Thirdwave\Export\Controller;
 
 use Bolt\Content;
-use Bolt\Storage;
-use Doctrine\DBAL\Connection;
+use Bolt\Controller\Base;
 use Silex\Application;
 use Silex\ControllerCollection;
-use Silex\ControllerProviderInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 
-/**
- * Class Controller
- *
- * @author  G.P. Gautier <ggautier@thirdwave.nl>
- * @version 0.5.0, 2016/06/08
- */
-class Controller implements ControllerProviderInterface
+class ExportController extends Base
 {
 
 
     /**
      * @var Extension
      */
-    protected $extension;
-
-
-    /**
-     * @param Extension $extension
-     */
-    public function __construct(Extension $extension)
-    {
-        $this->extension = $extension;
-    }
-
+//    protected $extension;
 
     /**
-     * @param Application $app
-     * @return ControllerCollection
+     * @param ControllerCollection $c
      */
-    public function connect(Application $app)
-    {
-        $routes = $app['controllers_factory'];
+//    public function __construct(Extension $extension)
+//    {
+//        $this->extension = $extension;
+//    }
 
-        $routes->get('/export', array($this, 'export'))->bind('export');
-        $routes->post('/export/download', array($this, 'download'))->bind('export_download');
+    /**
+     * {@inheritdoc}
+     */
+    protected function addRoutes(ControllerCollection $c)
+    {
+        $c->get('/', array($this, 'export'))->bind('export');
+        $c->post('/download', array($this, 'download'))->bind('export_download');
 
         // Check for permissions before executing the controller functions.
-        $routes->before(array($this->extension, 'checkPermissions'));
-
-        return $routes;
+        //$c->before(array($this, 'checkPermissions'));
+        
+        return $c;
     }
 
 

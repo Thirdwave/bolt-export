@@ -1,30 +1,93 @@
-<?php namespace Bolt\Extension\Thirdwave\Export;
+<?php
 
-use Bolt\BaseExtension;
+namespace Bolt\Extension\Thirdwave\Export;
+
+use Bolt\Asset\File\JavaScript;
+use Bolt\Asset\File\Stylesheet;
+use Bolt\Controller\Zone;
+use Bolt\Extension\SimpleExtension;
+use Bolt\Extension\Thirdwave\Export\Controller\ExportController;
 use Bolt\Extensions\Snippets\Location;
 use Bolt\Library;
+use Bolt\Menu\MenuEntry;
 use Bolt\Translation\Translator;
 use DirectoryIterator;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Translation\Loader\YamlFileLoader;
 
-
-/**
- * Class Extension
- *
- * @author  G.P. Gautier <ggautier@thirdwave.nl>
- * @version 0.5.0, 2016/06/08
- */
-class Extension extends BaseExtension
+class Extension extends SimpleExtension
 {
 
 
     /**
-     * @return string
+     * {@inheritdoc}
      */
-    public function getName()
+    protected function registerTwigPaths()
     {
-        return 'Export';
+        return [
+            'templates' => ['namespace' => 'export']
+        ];
+    }
+
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function getDefaultConfig()
+    {
+        return [
+            'permissions' => []
+        ];
+    }
+
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function registerAssets()
+    {
+        return [
+            Stylesheet::create()
+                ->setFileName('export.css')
+                ->setLate(true)
+                ->setPriority(5)
+                ->setZone(Zone::BACKEND),
+
+            JavaScript::create()
+                ->setFileName('export.js')
+                ->setLate(true)
+                ->setPriority(5)
+                ->setZone(Zone::BACKEND)
+        ];
+    }
+
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function registerBackendControllers()
+    {
+        return [
+            '/export' => new ExportController(),
+        ];
+    }
+
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function registerMenuEntries()
+    {
+        $menu = MenuEntry::create('export-menu', 'export')
+            //->setLabel(Translator::__('Export content', [], 'messages', 'nl'))
+            ->setLabel(Translator::__('Export content'))
+            ->setIcon('fa:file-excel-o')
+            ->setPermission('settings')
+            ->setRoute('export');
+
+        return [
+            $menu,
+        ];
     }
 
 
@@ -33,6 +96,8 @@ class Extension extends BaseExtension
      */
     public function initialize()
     {
+        $config = $this->getConfig();
+
         // Only initialize the extension for backend.
         if ($this->app['config']->getWhichEnd() !== 'backend') {
             return;
@@ -44,7 +109,7 @@ class Extension extends BaseExtension
         // roles that should have access to the export functions. When the roles
         // are defined, check if role 'root' is present and add it if absent.
         if (!isset($this->config['permissions']) || !is_array($this->config['permissions'])) {
-            $this->config['permissions'] = array('root', 'admin', 'developer');
+            $this->config['permissions'] = ['root', 'admin', 'developer'];
         } else {
             if (!in_array('root', $this->config['permissions'])) {
                 $this->config['permissions'][] = 'root';
@@ -80,7 +145,8 @@ class Extension extends BaseExtension
     /**
      * Adds locale files.
      */
-    protected function addLocale() {
+    protected function addLocale()
+    {
         $folder = __DIR__ . '/locales/' . substr($this->app['locale'], 0, 2);
 
         if (is_dir($folder)) {
@@ -106,13 +172,13 @@ class Extension extends BaseExtension
         $basePath = $this->app['paths']['root'] . 'extensions/vendor/thirdwave/bolt-export/assets';
 
         $this->addSnippet(
-          Location::END_OF_HEAD,
-          '<script src="' . $basePath . '/export.js"></script>'
+            Location::END_OF_HEAD,
+            '<script src="' . $basePath . '/export.js"></script>'
         );
 
         $this->addSnippet(
-          Location::END_OF_HEAD,
-          '<link rel="stylesheet" href="' . $basePath . '/export.css" media="screen">'
+            Location::END_OF_HEAD,
+            '<link rel="stylesheet" href="' . $basePath . '/export.css" media="screen">'
         );
     }
 
@@ -136,8 +202,8 @@ class Extension extends BaseExtension
         }
 
         $this->app['session']->getFlashBag()->add(
-          'error',
-          Translator::__('You do not have the right privileges to view that page.')
+            'error',
+            Translator::__('You do not have the right privileges to view that page.')
         );
 
         return Library::redirect('dashboard');

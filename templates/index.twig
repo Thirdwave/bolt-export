@@ -15,7 +15,7 @@
                             <option value="">{{ __('Select content type') }}</option>
                             <option value=""></option>
                             {% for name, properties in contenttypes %}
-                                <option value="{{ name }}"{% if contenttype.slug == name %} selected{% endif %}>{{ properties.name }}</option>
+                                <option value="{{ name }}"{% if contenttype is not empty and contenttype.slug == name %} selected{% endif %}>{{ properties.name }}</option>
                             {% endfor %}
                         </select>
                     </div>

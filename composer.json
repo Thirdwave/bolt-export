@@ -23,6 +23,7 @@
         }
     },
     "extra" : {
+        "bolt-assets": "web",
 		"bolt-class" : "Bolt\\Extension\\Thirdwave\\Export\\Extension"
     }
 }
