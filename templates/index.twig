@@ -6,6 +6,8 @@
 
 {% block page_main %}
     <form method="post" action="{{ path('export_download') }}">
+        <input type="hidden" name="export[sorting]">
+        <input type="hidden" name="export[filters]">
         <fieldset>
             <div class="row">
                 <div class="col-sm-12">
@@ -15,7 +17,7 @@
                             <option value="">{{ __('Select content type') }}</option>
                             <option value=""></option>
                             {% for name, properties in contenttypes %}
-                                <option value="{{ name }}"{% if contenttype.slug == name %} selected{% endif %}>{{ properties.name }}</option>
+                                <option value="{{ name }}"{% if contenttype is not empty and name in [contenttype.slug, contenttype.singular_slug, contenttype.tablename] %} selected{% endif %}>{{ properties.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -29,7 +31,6 @@
                     <div class="col-sm-12">
                         <h4>{{ __('Fields') }}</h4>
                         <div class="form-group">
-                            {#{% include '@export/partials/field-actions.twig' %}#}
                             <ul class="list-unstyled fields" data-sortable>
                                 {% for name, properties in fields %}
                                     <li class="field">
@@ -44,7 +45,6 @@
                                     </li>
                                 {% endfor %}
                             </ul>
-                            {#{% include '@export/partials/field-actions.twig' %}#}
                         </div>
                     </div>
                 </div>
@@ -71,27 +71,6 @@
                     </div>
                 </div>
             </fieldset>
-
-            {% if contenttype.relations is not empty %}
-                <fieldset>
-                    <div class="row">
-                        <div class="col-sm-12">
-                            <h4>{{ __('Filter by relation') }}</h4>
-                            {% for name, properties in contenttype.relations %}
-                                <div class="form-group">
-                                    <label class="control-label" for="export_relation_{{ name }}">{{ __(properties.label|default(name)) }}</label>
-                                    <select class="wide" data-select style="width: 100%;" id="export_relation_{{ name }}" name="export[relations][{{ name }}][]" multiple>
-                                        {% for id, caption in properties.values %}
-                                            <option value="{{ id }}">{{ caption }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </fieldset>
-            {% endif %}
-
             <fieldset>
                 <div class="row">
                     <div class="col-sm-12">
@@ -130,12 +109,6 @@
                 <div class="row">
                     <div class="col-sm-12">
                         <h4>{{ __('Download') }}</h4>
-                        {#<div class="form-group">#}
-                            {#<label class="control-label" for="export_format">{{ __('Choose format') }}</label>#}
-                            {#<select class="form-control" id="export_format" name="export[format]">#}
-                                {#<option value="csv">CSV</option>#}
-                            {#</select>#}
-                        {#</div>#}
                         <div class="form-group">
                             <label class="control-label" for="export_file">{{ __('File name') }}</label>
                             <input class="form-control" name="export[file]" id="export_file">

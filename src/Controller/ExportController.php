@@ -1,56 +1,31 @@
-<?php namespace Bolt\Extension\Thirdwave\Export;
+<?php namespace Bolt\Extension\Thirdwave\Export\Controller;
 
 use Bolt\Content;
-use Bolt\Storage;
-use Doctrine\DBAL\Connection;
+use Bolt\Controller\Base;
+use Bolt\Extension\Thirdwave\Export\Storage\ExportQuery;
+use Doctrine\DBAL\DBALException;
 use Silex\Application;
 use Silex\ControllerCollection;
-use Silex\ControllerProviderInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 
-/**
- * Class Controller
- *
- * @author  G.P. Gautier <ggautier@thirdwave.nl>
- * @version 0.5.0, 2016/06/08
- */
-class Controller implements ControllerProviderInterface
+class ExportController extends Base
 {
 
 
     /**
-     * @var Extension
+     * {@inheritdoc}
      */
-    protected $extension;
-
-
-    /**
-     * @param Extension $extension
-     */
-    public function __construct(Extension $extension)
+    protected function addRoutes(ControllerCollection $c)
     {
-        $this->extension = $extension;
-    }
-
-
-    /**
-     * @param Application $app
-     * @return ControllerCollection
-     */
-    public function connect(Application $app)
-    {
-        $routes = $app['controllers_factory'];
-
-        $routes->get('/export', array($this, 'export'))->bind('export');
-        $routes->post('/export/download', array($this, 'download'))->bind('export_download');
+        $c->get('/', array($this, 'export'))->bind('export');
+        $c->post('/download', array($this, 'download'))->bind('export_download');
 
         // Check for permissions before executing the controller functions.
-        $routes->before(array($this->extension, 'checkPermissions'));
-
-        return $routes;
+        //$c->before(array($this, 'checkPermissions'));
+        
+        return $c;
     }
 
 
@@ -64,8 +39,6 @@ class Controller implements ControllerProviderInterface
         $contenttype = null;
         if ($request->query->has('contenttype')) {
             $contenttype = $app['config']->get('contenttypes/' . $request->query->get('contenttype'));
-
-            $this->expandRelations($contenttype, $app);
         }
 
         return $app['render']->render('@export/index.twig', array(
@@ -80,12 +53,13 @@ class Controller implements ControllerProviderInterface
      * @param Application $app
      * @param Request     $request
      * @return Response
+     * @throws DBALException
      */
     public function download(Application $app, Request $request)
     {
         $profile  = $request->request->get('export');
         $filename = !empty($profile['file']) ? $profile['file'] . '.csv' : date('Ymd') . '-' . $profile['contenttype'] . '.csv';
-        $query    = new ExportQuery($app['db'], $app['storage']);
+        $query    = new ExportQuery($app['db'], $app['storage.legacy']);
         $rows     = $query->profile($profile)->results();
 
         if (isset($profile['header'])) {
@@ -110,25 +84,5 @@ class Controller implements ControllerProviderInterface
           'Pragma'                    => 'public',
           'Content-Length'            => strlen($csv)
         ));
-    }
-
-
-    /**
-     * @param array       $contenttype
-     * @param Application $app
-     */
-    protected function expandRelations(array &$contenttype, Application $app) {
-        if ( empty($contenttype['relations']) ) {
-            return;
-        }
-
-        foreach ( $contenttype['relations'] as $relation => &$properties ) {
-            $items = $app['storage']->getContent($relation);
-
-            $properties['values'] = [];
-            foreach ( $items as $item ) {
-                $properties['values'][$item->values['id']] = $item->getTitle();
-            }
-        }
     }
 }
