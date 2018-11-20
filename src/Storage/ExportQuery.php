@@ -1,16 +1,12 @@
-<?php namespace Bolt\Extension\Thirdwave\Export;
+<?php
+
+namespace Bolt\Extension\Thirdwave\Export\Storage;
 
 use Bolt\Storage;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Query\QueryBuilder;
 
-
-/**
- * Class ExportQuery
- *
- * @author  G.P. Gautier <ggautier@thirdwave.nl>
- * @version 0.5.0, 2016/06/09
- */
 class ExportQuery
 {
 
@@ -36,7 +32,7 @@ class ExportQuery
     /**
      * @var array
      */
-    protected $parameters = array();
+    protected $parameters = [];
 
 
     /**
@@ -59,6 +55,7 @@ class ExportQuery
 
     /**
      * @return array
+     * @throws DBALException
      */
     public function results()
     {
@@ -68,6 +65,7 @@ class ExportQuery
 
     /**
      * @return int
+     * @throws DBALException
      */
     public function count()
     {
@@ -85,12 +83,21 @@ class ExportQuery
      */
     public function profile(array $profile)
     {
-        return $this
-          ->contenttype($profile['contenttype'])
-          ->fields($profile['fields'])
-          ->filters($profile['filters'] ?: array())
-          ->relations($profile['relations'] ?: array())
-          ->sorting($profile['sorting'] ?: array());
+        $keys = [
+            'contenttype',
+            'fields',
+            'filters',
+            'relations',
+            'sorting'
+        ];
+
+        foreach ($keys as $key) {
+            if (!empty($profile[$key])) {
+                $this->$key($profile[$key]);
+            }
+        }
+
+        return $this;
     }
 
 
@@ -164,16 +171,16 @@ class ExportQuery
         foreach ($relations as $relation => $keys) {
             $where = $this->query->expr()->andX();
             $where->add($this->query->expr()->eq('relations.from_contenttype',
-              $this->query->expr()->literal($this->contenttype)));
+                $this->query->expr()->literal($this->contenttype)));
             $where->add($this->query->expr()->eq('relations.from_id', $this->contenttype . ".id"));
             $where->add($this->query->expr()->eq('relations.to_contenttype', $this->query->expr()->literal($relation)));
             $where->add($this->query->expr()->in('relations.to_id', $keys));
 
             $this->query->innerJoin(
-              $this->contenttype,
-              $this->storage->getTablename('relations'),
-              'relations',
-              $where
+                $this->contenttype,
+                $this->storage->getTablename('relations'),
+                'relations',
+                $where
             );
         }
 
@@ -189,8 +196,8 @@ class ExportQuery
     {
         for ($i = 0; $i < count($sorting['fields']); $i++) {
             $this->query->addOrderBy(
-              $sorting['fields'][$i],
-              strtoupper($sorting['directions'][$i])
+                $sorting['fields'][$i],
+                strtoupper($sorting['directions'][$i])
             );
         }
 
