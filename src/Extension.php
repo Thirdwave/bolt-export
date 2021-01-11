@@ -46,9 +46,9 @@ class Extension extends SimpleExtension
         // @todo: Fix url when using extension within Elvin. This is a workaround.
         if (class_exists(Application::class)) {
             return [
-                Stylesheet::create('cms/public/extensions/vendor/thirdwave/bolt-export/export.css')
+                Stylesheet::create('/cms/public/extensions/vendor/thirdwave/bolt-export/export.css')
                     ->setZone(Zone::BACKEND),
-                JavaScript::create('cms/public/extensions/vendor/thirdwave/bolt-export/export.js')
+                JavaScript::create('/cms/public/extensions/vendor/thirdwave/bolt-export/export.js')
                     ->setZone(Zone::BACKEND),
             ];
         }
